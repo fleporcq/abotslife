@@ -4,7 +4,7 @@ class Game {
 
     private readonly CAMERA_STEP: number = 10;
 
-    private readonly MAP_SIZE: number = 64;
+    private readonly MAP_SIZE: number = 32;
 
     private game: Phaser.Game;
 
@@ -73,6 +73,7 @@ class Game {
     }
 
     public addBot(name: string, position?: Abl.Position): this {
+        this.removeBot(name);
         if (!position) {
             position = new Abl.Position(this.game.world.randomX, this.game.world.randomY);
         }
@@ -83,18 +84,27 @@ class Game {
     }
 
     public removeBot(name: string): this {
-        let sprite = this.bots.get(name)[1];
-        sprite.destroy();
-        this.bots.delete(name);
+        if (this.bots.has(name)) {
+            let sprite = this.bots.get(name)[1];
+            sprite.destroy();
+            this.bots.delete(name);
+        }
         return this;
     }
 
     public getBot(name: string): Bot {
-        return this.bots.get(name)[0];
+        let bot: Bot = null;
+        if (this.bots.has(name)) {
+            bot = this.bots.get(name)[0];
+        }
+        return bot;
     }
 
-    public focusOnBot(name: string) {
-        this.game.camera.focusOn(this.bots.get(name)[1]);
+    public focusOnBot(name: string): this {
+        if (this.bots.has(name)) {
+            this.game.camera.focusOn(this.bots.get(name)[1]);
+        }
+        return this;
     }
 
     protected moveCamera() {
@@ -113,7 +123,7 @@ class Game {
     }
 
     protected debug(): void {
-        this.game.debug.text('Map size :' + this.MAP_SIZE.toString(), 32, 32);        
+        this.game.debug.text('Map size :' + this.MAP_SIZE.toString(), 32, 32);
         this.game.debug.text('Bots count :' + this.bots.size.toString(), 32, 48);
     }
 }
